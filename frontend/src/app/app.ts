@@ -47,7 +47,7 @@ export class App implements OnInit {
   public isAddEditModalOpen = false;
   public isDetailsModalOpen = false;
   public isCalculatorOpen = false;
-  public calculatorInitialPrice = 0.38;
+  public calculatorInitialPrice = 18.00;
   public isInfoModalOpen = false;
 
   // Backend Status

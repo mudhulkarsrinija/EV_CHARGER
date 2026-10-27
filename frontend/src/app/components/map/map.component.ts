@@ -176,12 +176,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private initMap(): void {
     if (!this.mapContainer || this.map) return;
 
-    // Center on US West coast default
+    // Center on Hyderabad, India
     this.map = L.map(this.mapContainer.nativeElement, {
       zoomControl: true,
       minZoom: 3,
       maxZoom: 18
-    }).setView([37.7749, -122.4194], 10);
+    }).setView([17.4300, 78.4000], 11);
 
     // CartoDB Dark Matter tiles (OpenStreetMap-based)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -245,7 +245,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
             ${station.powerKw} kW
           </span>
           <span style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">
-            $${station.pricingPerKwh.toFixed(2)}/kWh
+            ₹${station.pricingPerKwh.toFixed(2)}/kWh
           </span>
           <span style="background: #1f2937; color: #cbd5e1; border: 1px solid #374151; padding: 2px 8px; border-radius: 4px; font-size: 11px;">
             ${this.escapeHtml(station.operator)}

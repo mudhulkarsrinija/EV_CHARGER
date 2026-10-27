@@ -45,7 +45,20 @@ export class StorageService {
       try {
         const parsed = JSON.parse(storedStationsRaw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          loadedStations = parsed;
+          // If stored records contain previous US demo data (e.g. San Francisco, California), migrate to Hyderabad dataset
+          const hasNonHydData = parsed.some(s =>
+            (s.id && s.id.startsWith('demo-')) ||
+            s.city === 'San Francisco' ||
+            s.state === 'CA' ||
+            (s.city && s.city !== 'Hyderabad')
+          );
+          if (hasNonHydData) {
+            const customHydStations = parsed.filter(s => s.city === 'Hyderabad');
+            loadedStations = customHydStations.length > 0 ? [...customHydStations] : [...DEMO_STATIONS];
+            this.persistStations(loadedStations);
+          } else {
+            loadedStations = parsed;
+          }
         } else {
           // If empty array was stored, reseed with demonstration stations
           loadedStations = [...DEMO_STATIONS];
@@ -144,18 +157,18 @@ export class StorageService {
         id: newId,
         name: stationData.name || 'New Station',
         address: stationData.address || '',
-        city: stationData.city || '',
-        state: stationData.state || '',
-        zip: stationData.zip || '',
-        latitude: stationData.latitude || 37.7749,
-        longitude: stationData.longitude || -122.4194,
+        city: stationData.city || 'Hyderabad',
+        state: stationData.state || 'Telangana',
+        zip: stationData.zip || '500081',
+        latitude: stationData.latitude || 17.4400,
+        longitude: stationData.longitude || 78.3800,
         connectorTypes: stationData.connectorTypes && stationData.connectorTypes.length > 0
           ? stationData.connectorTypes
-          : ['CCS'],
-        powerKw: stationData.powerKw || 50,
-        chargingSpeed: stationData.chargingSpeed || `${stationData.powerKw || 50} kW`,
-        pricingPerKwh: stationData.pricingPerKwh !== undefined ? stationData.pricingPerKwh : 0.35,
-        operator: stationData.operator || 'Independent',
+          : ['CCS-2'],
+        powerKw: stationData.powerKw || 60,
+        chargingSpeed: stationData.chargingSpeed || `${stationData.powerKw || 60} kW`,
+        pricingPerKwh: stationData.pricingPerKwh !== undefined ? stationData.pricingPerKwh : 18.00,
+        operator: stationData.operator || 'Tata Power EZ Charge',
         totalPorts: stationData.totalPorts || 2,
         isDemo: false,
         notes: stationData.notes || '',

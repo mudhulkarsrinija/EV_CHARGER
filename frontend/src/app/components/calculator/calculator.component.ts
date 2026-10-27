@@ -65,7 +65,7 @@ interface VehiclePreset {
         <!-- Electricity Price -->
         <div class="form-group">
           <label class="field-label">
-            Electricity Price ($/kWh)
+            Electricity Price (₹/kWh)
             <span class="required">*</span>
           </label>
           <div class="input-wrapper">
@@ -75,11 +75,11 @@ interface VehiclePreset {
               [(ngModel)]="input.pricePerKwh"
               (ngModelChange)="recalculate()"
               min="0"
-              max="5"
-              step="0.01"
-              placeholder="e.g. 0.38"
+              max="100"
+              step="0.5"
+              placeholder="e.g. 18.00"
             />
-            <span class="input-unit">$/kWh</span>
+            <span class="input-unit">₹/kWh</span>
           </div>
           <span class="field-hint">Station or grid tariff</span>
         </div>
@@ -188,10 +188,10 @@ interface VehiclePreset {
         <div class="result-card cost-card">
           <span class="result-label">Estimated Charging Cost</span>
           <div class="result-value cost-value">
-            \${{ result.estimatedCost | number:'1.2-2' }}
+            ₹{{ result.estimatedCost | number:'1.2-2' }}
           </div>
           <span class="result-sub">
-            Formula: {{ result.energyRequiredKwh | number:'1.2-2' }} kWh × \${{ input.pricePerKwh | number:'1.2-2' }}
+            Formula: {{ result.energyRequiredKwh | number:'1.2-2' }} kWh × ₹{{ input.pricePerKwh | number:'1.2-2' }}
           </span>
         </div>
       </div>
@@ -565,26 +565,27 @@ interface VehiclePreset {
   `]
 })
 export class CalculatorComponent implements OnInit, OnChanges {
-  @Input() initialPrice: number = 0.38;
+  @Input() initialPrice: number = 18.00;
 
   public presets: VehiclePreset[] = [
-    { name: 'Tesla Model 3', capacityKwh: 60 },
-    { name: 'Tesla Model Y', capacityKwh: 75 },
-    { name: 'Hyundai Ioniq 5', capacityKwh: 77.4 },
-    { name: 'Ford Mach-E', capacityKwh: 88 },
-    { name: 'Chevy Bolt', capacityKwh: 65 }
+    { name: 'Tata Nexon EV', capacityKwh: 40.5 },
+    { name: 'Tata Punch EV', capacityKwh: 35 },
+    { name: 'Mahindra XUV400', capacityKwh: 39.4 },
+    { name: 'MG ZS EV', capacityKwh: 50.3 },
+    { name: 'BYD Atto 3', capacityKwh: 60.5 },
+    { name: 'Hyundai Ioniq 5', capacityKwh: 72.6 }
   ];
 
   public input: CalculationInput = {
-    batteryCapacity: 75,
+    batteryCapacity: 40.5,
     currentPercentage: 20,
     targetPercentage: 80,
-    pricePerKwh: 0.38
+    pricePerKwh: 18.00
   };
 
   public result: CalculationResult = {
-    energyRequiredKwh: 45,
-    estimatedCost: 17.1,
+    energyRequiredKwh: 24.3,
+    estimatedCost: 437.4,
     chargingDelta: 60,
     isValid: true
   };

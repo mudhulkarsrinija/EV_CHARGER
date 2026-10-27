@@ -33,8 +33,8 @@ assert(storageContent.includes('safeGetItem(STORAGE_KEY_STATIONS)'), 'StorageSer
 const modelPath = path.join(__dirname, 'src', 'app', 'models', 'station.model.ts');
 const modelContent = fs.readFileSync(modelPath, 'utf8');
 
-// Match demo station IDs
-const demoIdMatches = modelContent.match(/id:\s*['"](demo-\d+)['"]/g) || [];
+// Match demo station IDs (e.g. hyd-01, hyd-02)
+const demoIdMatches = modelContent.match(/id:\s*['"]((demo|hyd)-\d+)['"]/g) || [];
 assert(demoIdMatches.length >= 15, `Dataset contains at least 15 demonstration stations (found ${demoIdMatches.length})`);
 
 // 3. Verify Cost Calculator Business Logic

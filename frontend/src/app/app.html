@@ -30,7 +30,7 @@
         <span class="btn-text">Trip Calculator</span>
       </button>
 
-      <button class="nav-btn reset-btn" (click)="onResetToDemo()" title="Restore 16 demonstration stations">
+      <button class="nav-btn reset-btn" (click)="onResetToDemo()" title="Restore 16 Hyderabad demonstration stations">
         <span class="btn-icon">↺</span>
         <span class="btn-text">Reset Demo</span>
       </button>
@@ -54,7 +54,7 @@
         <input
           type="text"
           class="search-input"
-          placeholder="Search stations by name, city, address, or network..."
+          placeholder="Search by station, area (e.g. Hitec City, Gachibowli, Banjara Hills)..."
           [(ngModel)]="preferences.searchQuery"
           (ngModelChange)="onSearchChange()"
         />
@@ -79,10 +79,11 @@
             (ngModelChange)="onFilterChange()"
           >
             <option value="ALL">All Connectors</option>
-            <option value="CCS">CCS</option>
-            <option value="Tesla/NACS">Tesla / NACS</option>
-            <option value="CHAdeMO">CHAdeMO</option>
+            <option value="CCS-2">CCS-2</option>
             <option value="Type 2">Type 2</option>
+            <option value="Bharat DC-001">Bharat DC-001</option>
+            <option value="CHAdeMO">CHAdeMO</option>
+            <option value="Tesla/NACS">Tesla / NACS</option>
           </select>
         </div>
 
@@ -216,8 +217,8 @@
 
             <!-- Electricity Price -->
             <div class="spec-pill price-pill">
-              <span class="pill-icon">$</span>
-              <span>\${{ station.pricingPerKwh | number:'1.2-2' }}/kWh</span>
+              <span class="pill-icon">₹</span>
+              <span>₹{{ station.pricingPerKwh | number:'1.2-2' }}/kWh</span>
             </div>
           </div>
 

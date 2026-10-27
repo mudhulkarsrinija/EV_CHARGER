@@ -70,7 +70,7 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
                 [(ngModel)]="formData.city"
                 name="city"
                 required
-                placeholder="e.g. San Francisco"
+                placeholder="e.g. Hyderabad"
                 #cityInput="ngModel"
               />
               <span *ngIf="cityInput.invalid && (cityInput.dirty || cityInput.touched)" class="error-text">
@@ -88,7 +88,7 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
                 class="input"
                 [(ngModel)]="formData.state"
                 name="state"
-                placeholder="e.g. CA"
+                placeholder="e.g. Telangana"
               />
             </div>
             <div class="form-group flex-1">
@@ -98,7 +98,7 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
                 class="input"
                 [(ngModel)]="formData.zip"
                 name="zip"
-                placeholder="e.g. 94105"
+                placeholder="e.g. 500081"
               />
             </div>
           </div>
@@ -107,8 +107,8 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
           <div class="coords-box">
             <div class="coords-header">
               <label class="label mb-0">GPS Coordinates <span class="required">*</span></label>
-              <button type="button" class="link-btn" (click)="setSFDefaults()">
-                Use SF Coordinates
+              <button type="button" class="link-btn" (click)="setHyderabadDefaults()">
+                Use Hyderabad Coordinates
               </button>
             </div>
             <div class="form-row">
@@ -123,7 +123,7 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
                   step="0.0001"
                   min="-90"
                   max="90"
-                  placeholder="37.7749"
+                  placeholder="17.4474"
                   #latInput="ngModel"
                 />
               </div>
@@ -138,7 +138,7 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
                   step="0.0001"
                   min="-180"
                   max="180"
-                  placeholder="-122.4194"
+                  placeholder="78.3762"
                   #lngInput="ngModel"
                 />
               </div>
@@ -189,7 +189,7 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
 
             <div class="form-group flex-1">
               <label class="label">
-                Price per kWh ($) <span class="required">*</span>
+                Price per kWh (₹) <span class="required">*</span>
               </label>
               <input
                 type="number"
@@ -198,9 +198,9 @@ import { CONNECTOR_OPTIONS, OPERATOR_OPTIONS, Station } from '../../models/stati
                 name="pricingPerKwh"
                 required
                 min="0"
-                max="5"
-                step="0.01"
-                placeholder="e.g. 0.38"
+                max="100"
+                step="0.5"
+                placeholder="e.g. 18.00"
                 #priceInput="ngModel"
               />
               <span *ngIf="priceInput.invalid && (priceInput.dirty || priceInput.touched)" class="error-text">
@@ -522,16 +522,16 @@ export class StationModalComponent implements OnInit {
   } = {
     name: '',
     address: '',
-    city: '',
-    state: 'CA',
-    zip: '',
-    latitude: 37.7749,
-    longitude: -122.4194,
-    connectorTypes: ['CCS'],
-    powerKw: 150,
-    chargingSpeed: 'DC Fast (150 kW)',
-    pricingPerKwh: 0.38,
-    operator: 'ChargePoint',
+    city: 'Hyderabad',
+    state: 'Telangana',
+    zip: '500081',
+    latitude: 17.4474,
+    longitude: 78.3762,
+    connectorTypes: ['CCS-2'],
+    powerKw: 60,
+    chargingSpeed: 'DC Fast (60 kW)',
+    pricingPerKwh: 18.00,
+    operator: 'Tata Power EZ Charge',
     totalPorts: 6,
     notes: ''
   };
@@ -553,11 +553,11 @@ export class StationModalComponent implements OnInit {
         zip: this.stationToEdit.zip,
         latitude: this.stationToEdit.latitude,
         longitude: this.stationToEdit.longitude,
-        connectorTypes: [...(this.stationToEdit.connectorTypes || ['CCS'])],
+        connectorTypes: [...(this.stationToEdit.connectorTypes || ['CCS-2'])],
         powerKw: this.stationToEdit.powerKw,
         chargingSpeed: this.stationToEdit.chargingSpeed,
         pricingPerKwh: this.stationToEdit.pricingPerKwh,
-        operator: this.stationToEdit.operator || 'ChargePoint',
+        operator: this.stationToEdit.operator || 'Tata Power EZ Charge',
         totalPorts: this.stationToEdit.totalPorts || 4,
         notes: this.stationToEdit.notes || ''
       };
@@ -577,14 +577,13 @@ export class StationModalComponent implements OnInit {
     this.connectorError = this.formData.connectorTypes.length === 0;
   }
 
-  public setSFDefaults(): void {
-    // Generate slightly randomized SF coordinate
-    const latOffset = (Math.random() - 0.5) * 0.05;
-    const lngOffset = (Math.random() - 0.5) * 0.05;
-    this.formData.latitude = parseFloat((37.7749 + latOffset).toFixed(4));
-    this.formData.longitude = parseFloat((-122.4194 + lngOffset).toFixed(4));
-    this.formData.city = 'San Francisco';
-    this.formData.state = 'CA';
+  public setHyderabadDefaults(): void {
+    const latOffset = (Math.random() - 0.5) * 0.04;
+    const lngOffset = (Math.random() - 0.5) * 0.04;
+    this.formData.latitude = parseFloat((17.4400 + latOffset).toFixed(4));
+    this.formData.longitude = parseFloat((78.3800 + lngOffset).toFixed(4));
+    this.formData.city = 'Hyderabad';
+    this.formData.state = 'Telangana';
   }
 
   public onSubmit(): void {

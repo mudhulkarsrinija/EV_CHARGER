@@ -70,10 +70,10 @@ import { Station } from '../../models/station.model';
           <div class="spec-card">
             <span class="spec-label">Electricity Price</span>
             <div class="spec-value price">
-              \${{ station.pricingPerKwh | number:'1.2-2' }}
+              ₹{{ station.pricingPerKwh | number:'1.2-2' }}
               <span class="unit">/ kWh</span>
             </div>
-            <span class="spec-detail">Est. \$15.20 for 40 kWh</span>
+            <span class="spec-detail">Est. ₹{{ station.pricingPerKwh * 40 | number:'1.0-0' }} for 40 kWh</span>
           </div>
 
           <div class="spec-card">

@@ -75,9 +75,9 @@ async function runTests() {
     'Station item contains name, address, connectorTypes, powerKw, and pricingPerKwh');
 
   // 4. Test GET /api/stations/:id (existing)
-  const singleRes = await mockRequest('GET', '/api/stations/demo-01');
-  assert(singleRes.statusCode === 200, 'GET /api/stations/demo-01 returns HTTP 200');
-  assert(singleRes.body.id === 'demo-01', 'GET /api/stations/demo-01 returns correct station id');
+  const singleRes = await mockRequest('GET', '/api/stations/hyd-01');
+  assert(singleRes.statusCode === 200, 'GET /api/stations/hyd-01 returns HTTP 200');
+  assert(singleRes.body.id === 'hyd-01', 'GET /api/stations/hyd-01 returns correct station id');
 
   // 5. Test GET /api/stations/:id (not found)
   const notFoundRes = await mockRequest('GET', '/api/stations/non-existent-id');
