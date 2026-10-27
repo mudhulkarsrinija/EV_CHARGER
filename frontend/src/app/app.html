@@ -1,0 +1,367 @@
+<div class="app-container">
+  <!-- Top Header Navigation -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo">
+        <span class="logo-icon">⚡</span>
+      </div>
+      <div>
+        <h1 class="brand-title">EV Charge Finder</h1>
+        <p class="brand-subtitle">Electric vehicle charging locator, station manager & trip cost estimator</p>
+      </div>
+    </div>
+
+    <!-- Backend Status & Action Buttons -->
+    <div class="header-actions">
+      <!-- Backend Status Indicator -->
+      <div
+        class="backend-badge"
+        [class.online]="isBackendOnline"
+        (click)="isInfoModalOpen = true"
+        [title]="isBackendOnline ? 'Express Backend Online (Port 3000)' : 'Running Standalone in Browser Storage Mode'"
+      >
+        <span class="status-dot"></span>
+        <span class="status-text">{{ isBackendOnline ? 'Backend API Active' : 'Browser Storage' }}</span>
+      </div>
+
+      <!-- Quick Actions -->
+      <button class="nav-btn calc-btn" (click)="openCalculator()">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-text">Trip Calculator</span>
+      </button>
+
+      <button class="nav-btn reset-btn" (click)="onResetToDemo()" title="Restore 16 demonstration stations">
+        <span class="btn-icon">↺</span>
+        <span class="btn-text">Reset Demo</span>
+      </button>
+
+      <button class="nav-btn primary-btn" (click)="openAddStationModal()">
+        <span class="btn-icon">+</span>
+        <span class="btn-text">Add Station</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Search & Filter Bar -->
+  <section class="filter-section">
+    <div class="filter-container">
+      <!-- Search Input -->
+      <div class="search-box">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search stations by name, city, address, or network..."
+          [(ngModel)]="preferences.searchQuery"
+          (ngModelChange)="onSearchChange()"
+        />
+        <button
+          *ngIf="preferences.searchQuery"
+          class="clear-search-btn"
+          (click)="preferences.searchQuery = ''; onSearchChange()"
+          title="Clear search"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Filter Controls Group -->
+      <div class="filter-controls">
+        <!-- Connector Filter -->
+        <div class="filter-control">
+          <label class="control-label">Connector</label>
+          <select
+            class="control-select"
+            [(ngModel)]="preferences.connectorType"
+            (ngModelChange)="onFilterChange()"
+          >
+            <option value="ALL">All Connectors</option>
+            <option value="CCS">CCS</option>
+            <option value="Tesla/NACS">Tesla / NACS</option>
+            <option value="CHAdeMO">CHAdeMO</option>
+            <option value="Type 2">Type 2</option>
+          </select>
+        </div>
+
+        <!-- Power Rating Filter -->
+        <div class="filter-control">
+          <label class="control-label">Power Speed</label>
+          <select
+            class="control-select"
+            [(ngModel)]="preferences.powerCategory"
+            (ngModelChange)="onFilterChange()"
+          >
+            <option value="ALL">All Speeds</option>
+            <option value="DC_ULTRA">⚡ Ultra-Fast (150+ kW)</option>
+            <option value="DC_FAST">⚡ DC Fast (50–149 kW)</option>
+            <option value="L2">🔌 Level 2 (&lt;50 kW)</option>
+          </select>
+        </div>
+
+        <!-- Sort Order -->
+        <div class="filter-control">
+          <label class="control-label">Sort By</label>
+          <select
+            class="control-select"
+            [(ngModel)]="preferences.sortBy"
+            (ngModelChange)="onFilterChange()"
+          >
+            <option value="name">Station Name (A–Z)</option>
+            <option value="power_desc">Power (Highest first)</option>
+            <option value="price_asc">Price (Lowest first)</option>
+          </select>
+        </div>
+
+        <!-- Favorites Toggle Button -->
+        <button
+          type="button"
+          class="fav-filter-btn"
+          [class.active]="preferences.onlyFavorites"
+          (click)="toggleFavoritesOnly()"
+        >
+          <span>★</span>
+          <span>Favorites ({{ favorites.length }})</span>
+        </button>
+
+        <!-- Reset Filters Button -->
+        <button
+          type="button"
+          class="reset-filters-btn"
+          (click)="resetFilters()"
+          title="Reset all filters"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Filters Summary & Total Count -->
+    <div class="filter-status-bar">
+      <div class="count-pill">
+        Showing <strong>{{ filteredStations.length }}</strong> of {{ stations.length }} stations
+        <span *ngIf="preferences.onlyFavorites" class="filter-tag">Favorites</span>
+        <span *ngIf="preferences.connectorType !== 'ALL'" class="filter-tag">{{ preferences.connectorType }}</span>
+        <span *ngIf="preferences.powerCategory !== 'ALL'" class="filter-tag">{{ preferences.powerCategory }}</span>
+      </div>
+
+      <div class="storage-notice">
+        <span>💾 Changes saved in browser <strong>Local Storage</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Split Layout (Sidebar List + Interactive Map) -->
+  <main class="main-content">
+    <!-- Left Sidebar: Station List -->
+    <aside class="stations-sidebar">
+      <!-- Empty State -->
+      <div *ngIf="filteredStations.length === 0" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No stations found</h3>
+        <p>No charging stations match your current search or filter criteria.</p>
+        <button class="empty-action-btn" (click)="resetFilters()">
+          Clear Filters
+        </button>
+      </div>
+
+      <!-- Station Cards -->
+      <div class="cards-list" *ngIf="filteredStations.length > 0">
+        <article
+          *ngFor="let station of filteredStations"
+          class="station-card"
+          [class.selected]="selectedStation?.id === station.id"
+          (click)="openStationDetails(station)"
+        >
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="card-title-row">
+              <h3 class="card-title">{{ station.name }}</h3>
+              <button
+                class="star-btn"
+                [class.active]="isStationFavorite(station.id)"
+                (click)="toggleFavorite(station.id, $event)"
+                [title]="isStationFavorite(station.id) ? 'Remove favorite' : 'Mark favorite'"
+              >
+                ★
+              </button>
+            </div>
+
+            <!-- Operator and Demo Badges -->
+            <div class="card-badges">
+              <span class="operator-badge">{{ station.operator }}</span>
+              <span *ngIf="station.isDemo" class="demo-badge">Sample Data</span>
+              <span class="ports-badge">{{ station.totalPorts }} Ports</span>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="card-location">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              <circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            <span>{{ station.address }}, {{ station.city }}</span>
+          </div>
+
+          <!-- Specs: Connectors, Power, Price -->
+          <div class="card-specs">
+            <!-- Power & Speed -->
+            <div class="spec-pill power-pill">
+              <span class="pill-icon">⚡</span>
+              <span>{{ station.powerKw }} kW</span>
+            </div>
+
+            <!-- Electricity Price -->
+            <div class="spec-pill price-pill">
+              <span class="pill-icon">$</span>
+              <span>\${{ station.pricingPerKwh | number:'1.2-2' }}/kWh</span>
+            </div>
+          </div>
+
+          <!-- Connectors Pills -->
+          <div class="connectors-row">
+            <span *ngFor="let conn of station.connectorTypes" class="conn-tag">
+              {{ conn }}
+            </span>
+          </div>
+
+          <!-- Actions Bar -->
+          <div class="card-actions">
+            <button
+              class="card-btn map-locate-btn"
+              (click)="panToStationOnMap(station, $event)"
+              title="Show on map"
+            >
+              📍 Locate
+            </button>
+            <button
+              class="card-btn details-btn"
+              (click)="openStationDetails(station)"
+              title="View full specs"
+            >
+              Details
+            </button>
+            <button
+              class="card-btn calc-cost-btn"
+              (click)="openCalculator(station, $event)"
+              title="Estimate charging cost"
+            >
+              ⚡ Cost
+            </button>
+            <button
+              class="card-btn edit-action-btn"
+              (click)="openEditStationModal(station, $event)"
+              title="Edit station"
+            >
+              ✎
+            </button>
+            <button
+              class="card-btn delete-action-btn"
+              (click)="onDeleteStation(station.id, $event)"
+              title="Delete station"
+            >
+              🗑
+            </button>
+          </div>
+        </article>
+      </div>
+    </aside>
+
+    <!-- Right Area: Leaflet Map Container -->
+    <section class="map-section">
+      <app-map
+        [stations]="filteredStations"
+        [selectedStationId]="selectedStation?.id || null"
+        (selectStation)="onSelectStationFromMap($event)"
+        (openDirections)="openDirections($event)"
+      ></app-map>
+    </section>
+  </main>
+
+  <!-- Station Details Modal -->
+  <app-station-details
+    *ngIf="isDetailsModalOpen && selectedStation"
+    [station]="selectedStation"
+    [isFavorite]="isStationFavorite(selectedStation.id)"
+    (close)="isDetailsModalOpen = false"
+    (toggleFavorite)="toggleFavorite($event)"
+    (editStation)="openEditStationModal($event)"
+    (deleteStation)="onDeleteStation($event)"
+    (useInCalculator)="openCalculator($event)"
+  ></app-station-details>
+
+  <!-- Add / Edit Station Modal -->
+  <app-station-modal
+    *ngIf="isAddEditModalOpen"
+    [stationToEdit]="stationToEdit"
+    (save)="onSaveStation($event)"
+    (cancel)="isAddEditModalOpen = false; stationToEdit = null"
+  ></app-station-modal>
+
+  <!-- Charging Cost Calculator Modal -->
+  <div *ngIf="isCalculatorOpen" class="modal-backdrop" (click)="closeCalculator()">
+    <div class="modal-dialog-calculator" (click)="$event.stopPropagation()">
+      <div class="calc-modal-top">
+        <button class="modal-close-icon" (click)="closeCalculator()">✕</button>
+      </div>
+      <app-calculator [initialPrice]="calculatorInitialPrice"></app-calculator>
+    </div>
+  </div>
+
+  <!-- Backend & Architecture Info Modal -->
+  <div *ngIf="isInfoModalOpen" class="modal-backdrop" (click)="isInfoModalOpen = false">
+    <div class="info-dialog" (click)="$event.stopPropagation()">
+      <div class="info-header">
+        <h2 class="info-title">⚡ EV Charge Finder Architecture</h2>
+        <button class="modal-close-icon" (click)="isInfoModalOpen = false">✕</button>
+      </div>
+
+      <div class="info-content">
+        <div class="info-status-row">
+          <span class="status-label">Backend Status:</span>
+          <span class="status-value" [class.online-text]="isBackendOnline">
+            {{ isBackendOnline ? '🟢 Connected (Node.js Express on port 3000)' : '⚪ Standalone Browser Storage' }}
+          </span>
+        </div>
+
+        <div class="info-block">
+          <h4>Separation of Concerns:</h4>
+          <ul>
+            <li><strong>Frontend Persistence:</strong> All station additions, updates, deletions, and user preferences are saved immediately to browser <code>Local Storage</code> (<code>ev_stations</code>, <code>ev_favorites</code>, <code>ev_preferences</code>).</li>
+            <li><strong>Backend Demonstration API:</strong> The lightweight Node.js Express server provides endpoints (<code>/api/health</code>, <code>/api/stations</code>, <code>/api/stations/:id</code>, <code>/api/info</code>) without requiring any external database.</li>
+            <li><strong>Offline Resilient:</strong> Frontend automatically falls back to bundled demonstration records if the backend is stopped.</li>
+          </ul>
+        </div>
+
+        <div class="info-block">
+          <h4>Backend API Endpoints:</h4>
+          <div class="endpoints-list">
+            <code>GET http://localhost:3000/api/health</code>
+            <code>GET http://localhost:3000/api/stations</code>
+            <code>GET http://localhost:3000/api/stations/:id</code>
+            <code>GET http://localhost:3000/api/info</code>
+          </div>
+        </div>
+
+        <div class="info-block">
+          <h4>Demonstration Stations:</h4>
+          <p>Total sample stations in dataset: <strong>{{ stations.length }}</strong></p>
+          <p class="static-note">⚠️ Note: All station availability data is demonstration/static information and is not live.</p>
+        </div>
+      </div>
+
+      <div class="info-footer">
+        <button class="primary-btn" (click)="isInfoModalOpen = false">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Pill -->
+  <div *ngIf="toastMessage" class="toast-notification" [class]="'toast-' + toastType">
+    <span class="toast-dot"></span>
+    <span class="toast-text">{{ toastMessage }}</span>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+{
+  "name": "ev-charge-finder-backend",
+  "version": "1.0.0",
+  "description": "Node.js Express backend for EV Charge Finder demonstration APIs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test.js"
+  },
+  "keywords": ["ev", "charging", "express", "api"],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
